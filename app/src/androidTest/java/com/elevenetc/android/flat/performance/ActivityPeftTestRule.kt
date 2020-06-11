@@ -3,12 +3,15 @@ package com.elevenetc.android.flat.performance
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
+import android.os.Environment
 import androidx.test.jank.IMonitor
 import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.rule.ActivityTestRule
-import junit.framework.TestCase
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
+import java.io.File
+
 
 open class ActivityPerfTestRule<T : Activity>(activityClass: Class<T>) : ActivityTestRule<T>(activityClass) {
 
@@ -20,8 +23,11 @@ open class ActivityPerfTestRule<T : Activity>(activityClass: Class<T>) : Activit
     }
 
     override fun apply(base: Statement, description: Description): Statement {
-        annotation = description.getAnnotation(PerformanceTest::class.java)!!
-        monitor = PerfMonitor(InstrumentationRegistry.getInstrumentation(), annotation.processName)
+        if (description.getAnnotation(PerformanceTest::class.java) != null) {
+            annotation = description.getAnnotation(PerformanceTest::class.java)!!
+            monitor = PerfMonitor(InstrumentationRegistry.getInstrumentation(), annotation.processName)
+        }
+
         return super.apply(base, description)
     }
 
@@ -38,12 +44,13 @@ open class ActivityPerfTestRule<T : Activity>(activityClass: Class<T>) : Activit
         super.afterActivityLaunched()
     }
 
+
     override fun afterActivityFinished() {
         val results = monitor.stopIteration()
         val type = annotation.perfType.type
 
         val get = results.get(type)
-        var result:Double = 0.0
+        var result = 0.0
 
         if (get is Double) {
             result = get
@@ -53,22 +60,110 @@ open class ActivityPerfTestRule<T : Activity>(activityClass: Class<T>) : Activit
 
         //val res: Double = results.getDouble(type, results.getInt(type).toDouble())
 
+        val averageFrameTime = annotation.averageFrameTime
+
+        if (averageFrameTime == 0f) {
+
+        }
+
         val assertion = when (annotation.assertionType) {
-            PerformanceTest.AssertionType.LESS -> result < annotation.averageFrameTimeMs
-            PerformanceTest.AssertionType.LESS_OR_EQUAL -> result <= annotation!!.averageFrameTimeMs
-            PerformanceTest.AssertionType.GREATER -> result > annotation!!.averageFrameTimeMs
-            PerformanceTest.AssertionType.GREATER_OR_EQUAL -> result >= annotation!!.averageFrameTimeMs
-            PerformanceTest.AssertionType.EQUAL -> result == annotation!!.averageFrameTimeMs.toDouble()
+            PerformanceTest.AssertionType.LESS -> result < averageFrameTime
+            PerformanceTest.AssertionType.LESS_OR_EQUAL -> result <= averageFrameTime
+            PerformanceTest.AssertionType.GREATER -> result > averageFrameTime
+            PerformanceTest.AssertionType.GREATER_OR_EQUAL -> result >= averageFrameTime
+            PerformanceTest.AssertionType.EQUAL -> result == averageFrameTime.toDouble()
             null -> false
         }
-        TestCase.assertTrue(
-            String.format(
-                "Monitor: %s, Expected: %f, Received: %f.",
-                type, annotation.averageFrameTimeMs, result
-            ),
-            assertion
-        )
+//        TestCase.assertTrue(
+//            String.format(
+//                "Monitor: %s, Expected: %f, Received: %f.",
+//                type, averageFrameTime, result
+//            ),
+//            assertion
+//        )
+
+        val context = InstrumentationRegistry.getInstrumentation().context
+
+
+        //activity.getExternalFilesDir()
+        val filesDir = context.filesDir
+        val ss = context.fileList()
+
+        givePerm()
+        xxx()
+
+        val externalStorageState = Environment.getExternalStorageState()
+
+        val externalFilesDir = context.getExternalFilesDir(null)
+        val externalFilesDirs = context.getExternalFilesDirs(null)
+
+        externalFilesDirs.forEach {
+            println(it)
+        }
+
+        if (externalFilesDir != null && externalFilesDirs != null) {
+            val destPath: String = externalFilesDir.absolutePath
+        }
+
+
+        val dir = File(filesDir, "test-result")
+        val file = File(dir, "hello.txt")
+        if (!dir.exists()) {
+            dir.mkdir()
+            file.writeText("zed")
+        }
+
+
+
         super.afterActivityFinished()
+    }
+
+    fun xxx() {
+
+        val context = InstrumentationRegistry.getInstrumentation().context
+        var baseDir: String? = null
+        val state = Environment.getExternalStorageState()
+        if (Environment.MEDIA_MOUNTED == state) {
+            val baseDirFile: File? = context.getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS)
+            if (baseDirFile == null) {
+                baseDir = context.getFilesDir().getAbsolutePath()
+            } else {
+                baseDir = baseDirFile.absolutePath
+            }
+        } else {
+            baseDir = context.getFilesDir().getAbsolutePath()
+        }
+
+        if (baseDir != null) {
+            val dir = File(baseDir, "hello-dir")
+            if (!dir.exists()) {
+                dir.mkdir()
+            }
+
+            val file = File(dir, "hello.txt")
+
+            if (!file.exists()) {
+                file.createNewFile()
+                file.writeText("s")
+            }
+        }
+    }
+
+    fun givePerm() {
+
+        val context = InstrumentationRegistry.getInstrumentation().context
+        val packageName = context.packageName
+
+        getInstrumentation().uiAutomation.executeShellCommand("pm grant $packageName android.permission.WRITE_EXTERNAL_STORAGE")
+
+        if (packageName.isEmpty()) {
+
+        }
+    }
+
+    fun zed() {
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
     }
 
     companion object {

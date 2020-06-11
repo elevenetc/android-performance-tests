@@ -3,9 +3,9 @@ package com.elevenetc.android.flat.performance
 @Retention(AnnotationRetention.RUNTIME)
 @Target(AnnotationTarget.FUNCTION)
 annotation class PerformanceTest(
-    val processName: String = "",
-    val perfType: PerfType = PerfType.TOTAL_FRAMES,
-    val averageFrameTimeMs: Float = 0f,
+    val processName: String,
+    val perfType: PerfType,
+    val averageFrameTime: Float,
     val assertionType: AssertionType = AssertionType.LESS_OR_EQUAL
 ) {
     enum class PerfType(val type: String) {
