@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        const val ITEMS_COUNT = 150
+        const val ITEMS_COUNT = 50
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,7 +64,8 @@ class MainActivity : AppCompatActivity() {
             //val ch0 = (holder.itemView as RelativeLayout).getChildAt(0)
             //val ch1 = (holder.itemView as RelativeLayout).getChildAt(1)
 
-            //Thread.sleep(100)
+            val d = Math.round(Math.random() * 10)
+            Thread.sleep(d)
 
             if (holder.itemView is TextView) {
                 holder.itemView.text = "This is item $position"

@@ -17,14 +17,13 @@ class TestX {
 
 
     @get:Rule
-    val activityRule = XRule()
-    //val activityRule = ActivityTestRule(MainActivity::class.java)
+    val activityRule = ActivityTestRule(MainActivity::class.java)
 
     @Test
     fun zed() {
         val context = InstrumentationRegistry.getInstrumentation().context
         val targetContext = InstrumentationRegistry.getInstrumentation().targetContext
-        writeTimeFile(targetContext)
+        //writeTimeFile(targetContext)
     }
 
 
@@ -33,6 +32,6 @@ class TestX {
 class XRule : ActivityTestRule<MainActivity>(MainActivity::class.java) {
     override fun afterActivityLaunched() {
 
-        writeTimeFile(activity)
+        //writeTimeFile(activity)
     }
 }

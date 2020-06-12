@@ -4,6 +4,8 @@ import android.Manifest
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiScrollable
+import androidx.test.uiautomator.UiSelector
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,21 +30,40 @@ class SixthTest {
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
     }
 
-    @Test(timeout = 10000)
+    @Test(timeout = 50000)
     @PerformanceTest(
         BuildConfig.APPLICATION_ID,
         PerformanceTest.PerfType.AVG_FRAME_TIME_99TH,
         16f,
         PerformanceTest.AssertionType.LESS_OR_EQUAL
     )
-    fun testSixth() {
+    fun testA() {
 
-//        for (i in 0 until INNER_LOOP) {
-//            val appViews = UiScrollable(UiSelector().scrollable(true))
-//            appViews.setAsVerticalList()
-//            appViews.scrollTextIntoView("This is item ${MainActivity.ITEMS_COUNT - 1}")
-//            appViews.scrollTextIntoView("This is item 1")
-//        }
+        for (i in 0 until INNER_LOOP) {
+            val appViews = UiScrollable(UiSelector().scrollable(true))
+            appViews.setAsVerticalList()
+            appViews.scrollTextIntoView("This is item ${MainActivity.ITEMS_COUNT - 1}")
+            appViews.scrollTextIntoView("This is item 1")
+        }
+
+
+    }
+
+    @Test(timeout = 50000)
+    @PerformanceTest(
+        BuildConfig.APPLICATION_ID,
+        PerformanceTest.PerfType.AVG_FRAME_TIME_99TH,
+        16f,
+        PerformanceTest.AssertionType.LESS_OR_EQUAL
+    )
+    fun testB() {
+
+        for (i in 0 until INNER_LOOP) {
+            val appViews = UiScrollable(UiSelector().scrollable(true))
+            appViews.setAsVerticalList()
+            appViews.scrollTextIntoView("This is item ${MainActivity.ITEMS_COUNT - 1}")
+            appViews.scrollTextIntoView("This is item 1")
+        }
 
 
     }

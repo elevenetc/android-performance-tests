@@ -2,36 +2,84 @@ package com.elevenetc.android.flat.performance
 
 import android.content.Context
 import android.os.Environment
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import java.io.BufferedReader
 import java.io.File
+import java.io.FileReader
 
-fun writeTimeFile(context: Context) {
+
+val moshi = Moshi.Builder()
+    .add(KotlinJsonAdapterFactory())
+    .build()
+
+var jsonAdapter: JsonAdapter<PerfLog> = moshi.adapter(PerfLog::class.java)
+
+fun writeTimeFile(className: String, methodName: String, avg: Double, context: Context) {
 
 
-    var baseDir: String? = null
     val state = Environment.getExternalStorageState()
-    if (Environment.MEDIA_MOUNTED == state) {
-        val baseDirFile: File? = context.getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS)
+    val baseDir = if (Environment.MEDIA_MOUNTED == state) {
+        val baseDirFile: File? = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
         if (baseDirFile == null) {
-            baseDir = context.getFilesDir().getAbsolutePath()
+            throw RuntimeException("no downloads dir")
         } else {
-            baseDir = baseDirFile.absolutePath
+            baseDirFile.absolutePath
         }
     } else {
-        baseDir = context.getFilesDir().getAbsolutePath()
+        throw RuntimeException("no mounted disk")
     }
 
-    if (baseDir != null) {
-        val dir = File(baseDir, "hello-dir")
-        if (!dir.exists()) {
-            dir.mkdir()
+    val logDir = File(baseDir, "pef-dir")
+    if (!logDir.exists()) logDir.mkdir()
+    val logFile = File(logDir, "perf.json")
+    if (!logFile.exists()) {
+        logFile.createNewFile()
+
+        val log = PerfLog()
+        val perfClass = PerfLog.PerfClass()
+        perfClass.methods[methodName] = avg
+        log.classes[className] = perfClass
+
+        logFile.writeText(jsonAdapter.toJson(log))
+    } else {
+        val file = loadFile(logFile)
+        val log = jsonAdapter.fromJson(file)!!
+
+
+
+        if (log.classes.containsKey(className)) {
+            val clazz = log.classes[className]!!
+            clazz.methods[methodName] = avg
+        } else {
+            val perfClass = PerfLog.PerfClass()
+            perfClass.methods[methodName] = avg
+            log.classes[className] = perfClass
         }
 
-        val file = File(dir, "hello.txt")
-
-        if (!file.exists()) {
-            file.createNewFile()
-        }
-
-        file.appendText(System.currentTimeMillis().toString() + "\n")
+        logFile.writeText(jsonAdapter.toJson(log))
     }
+}
+
+fun loadFile(file: File): String {
+
+    val text = StringBuilder()
+
+    val br = BufferedReader(FileReader(file));
+    val line = ""
+
+    BufferedReader(br).use { r ->
+        r.lineSequence().forEach {
+            text.append(it)
+            text.append('\n')
+        }
+    }
+    br.close();
+
+    return text.toString()
+}
+
+data class PerfLog(val classes: MutableMap<String, PerfClass> = mutableMapOf()) {
+    data class PerfClass(val methods: MutableMap<String, Double> = mutableMapOf())
 }

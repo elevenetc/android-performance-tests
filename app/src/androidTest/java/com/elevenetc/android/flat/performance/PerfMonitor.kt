@@ -117,7 +117,7 @@ class PerfMonitor(private val instrumentation: Instrumentation, private val proc
                             }
                             stat.type == Double::class.java -> {
                                 val stats = accumulatedStats[stat] as MutableList<Double>
-                                stats.add(java.lang.Double.valueOf(part!!))
+                                stats.add(java.lang.Double.valueOf(part))
                             }
                             else -> // Shouldn't get here
                                 throw IllegalStateException("Unsupported JankStat type")
@@ -137,7 +137,7 @@ class PerfMonitor(private val instrumentation: Instrumentation, private val proc
             stat.reset()
         }
 
-        return getMetrics()
+        return metrics
     }
 
     private fun putAvgMaxInteger(
