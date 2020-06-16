@@ -68,6 +68,23 @@ class SixthTest {
 
     }
 
+    @Test
+    @PerformanceTest(
+        BuildConfig.APPLICATION_ID,
+        PerformanceTest.PerfType.AVG_FRAME_TIME_99TH,
+        16f,
+        PerformanceTest.AssertionType.LESS_OR_EQUAL
+    )
+    fun testC() {
+        val x = 10 + 11
+        assert(x == 21)
+    }
+
+    @Test
+    fun testD(){
+
+    }
+
 //    @Test
 //    @PerformanceTest(
 //        PACKAGE_NAME,

@@ -34,12 +34,19 @@ open class ActivityPerfTestRule<T : Activity>(activityClass: Class<T>) : Activit
     }
 
     override fun beforeActivityLaunched() {
-        monitor.startIteration()
+        if(this::monitor.isInitialized){
+            monitor.startIteration()
+        }
         super.beforeActivityLaunched()
     }
 
 
     override fun afterActivityFinished() {
+
+        if(!this::monitor.isInitialized){
+            return
+        }
+
         val results = monitor.stopIteration()
         val type = annotation.perfType.type
 
